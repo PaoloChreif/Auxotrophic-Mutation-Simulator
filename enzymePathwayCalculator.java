@@ -21,16 +21,16 @@ public class enzymePathwayCalculator {
 
         for (int i = 0; i < numberOfEssentialProducts; i++) {
             System.out.print("Input essential product number " + (i + 1) + ": ");
-            essentials[i] = userInput.next();
+            essentials[i] = userInput.next().toUpperCase();
         }
 
         System.out.print("Are there any lethal intermediates (Y/N): ");
-        String lethalOrNoLethal = userInput.next();
+        String lethalOrNoLethal = userInput.next().toUpperCase();
         String lethalIntermediate = "";
 
         if (lethalOrNoLethal.equals("Y")) {
             System.out.print("Input the lethal intermediate: ");
-            lethalIntermediate = userInput.next();
+            lethalIntermediate = userInput.next().toUpperCase();
         }
 
         ArrayList<String> allProducts = new ArrayList<>();
@@ -45,8 +45,8 @@ public class enzymePathwayCalculator {
             enzymesAndProperties[i] = new String[instancesOfEnzyme][2];
             for (int j = 0; j < instancesOfEnzyme; j++) {
                 System.out.print("Input the metabolic product it uses and the product it produces (X Y): ");
-                String pointer = enzymesAndProperties[i][j][0] = userInput.next();
-                String pointed = enzymesAndProperties[i][j][1] = userInput.next();
+                String pointer = enzymesAndProperties[i][j][0] = userInput.next().toUpperCase();
+                String pointed = enzymesAndProperties[i][j][1] = userInput.next().toUpperCase();
                 if (!allProducts.contains(pointer)) {
                     allProducts.add(pointer);
                 }
@@ -121,7 +121,7 @@ public class enzymePathwayCalculator {
             String[] supplements = new String[numberOfSupplements];
             for (int i = 0; i < numberOfSupplements; i++) {
                 System.out.print("Input supplement number " + (i+1) + ": ");
-                supplements[i] = userInput.next();
+                supplements[i] = userInput.next().toUpperCase();
             }
             
             boolean grows = singleMutantgrowthChecker(mutatedEnzyme, enzymesAndProperties, essentials, supplements, lethalIntermediate);
@@ -189,7 +189,7 @@ public class enzymePathwayCalculator {
             String[] supplements = new String[numberOfSupplements];
             for (int i = 0; i < numberOfSupplements; i++) {
                 System.out.print("Input supplement number " + (i+1) + ": ");
-                supplements[i] = userInput.next();
+                supplements[i] = userInput.next().toUpperCase();
             }
             
             boolean grows = doubleMutantGrowthChecker(mutatedEnzyme1, mutatedEnzyme2, enzymesAndProperties, essentials, supplements, lethalIntermediate);
