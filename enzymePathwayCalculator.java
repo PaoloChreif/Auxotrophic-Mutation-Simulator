@@ -37,7 +37,7 @@ public class enzymePathwayCalculator {
 
 
         ////////////////////////////
-        // Data Collection Driver // (Took 1 Day)
+        // Data Collection Driver //
         ////////////////////////////
         for (int i = 0; i < numberOfEnzymesInPath; i++) {
             System.out.print("Input the number of times enzyme " + (i + 1) + " is present: ");
@@ -63,16 +63,15 @@ public class enzymePathwayCalculator {
         System.out.print("Select the simulation of a mutant(1) or double mutant(2): ");
         int mutationSelection = userInput.nextInt();
 
-        // Simulation Type Picker //
-        System.out.print("Simulate all mutants in all possible mediums(1) or simulate something specific(2): ");
-        int runAllOrSpecific = userInput.nextInt();
-
 
         // If else to pick between single or double mutant
         //////////////////////////////////////
         // Single Mutation Simulator Driver //
         //////////////////////////////////////
         if (mutationSelection == 1) {
+            // Simulation Type Picker //
+            System.out.print("Simulate all mutants in all possible mediums(1) or simulate something specific(2): ");
+            int runAllOrSpecific = userInput.nextInt();
             // If else to simulate all possible or specific
             if (runAllOrSpecific == 1) {
                 simulateAllSingle(enzymesAndProperties, essentials, allProducts, lethalIntermediate);
@@ -86,7 +85,7 @@ public class enzymePathwayCalculator {
         // Double Mutation Simulator Driver //
         //////////////////////////////////////
         else if (mutationSelection == 2){
-
+            specificSimulatorDouble(userInput, enzymesAndProperties, essentials, lethalIntermediate);
         }
         userInput.close();
     }
@@ -106,9 +105,9 @@ public class enzymePathwayCalculator {
     }
 
 
-    /////////////////////////
-    // Specific Simulation //
-    /////////////////////////
+    ///////////////////////////////////////
+    // Single Mutant Specific Simulation //
+    ///////////////////////////////////////
     public static void specificSimulatorSingle (Scanner userInput, String[][][]enzymesAndProperties, String[] essentials, String lethalIntermediate) {
         int moreCheck = 1;
         // While loop to ask for multiple prompts if the user wants to try different combos
@@ -125,7 +124,7 @@ public class enzymePathwayCalculator {
                 supplements[i] = userInput.next();
             }
             
-            boolean grows = growthChecker(mutatedEnzyme, enzymesAndProperties, essentials, supplements, lethalIntermediate);
+            boolean grows = singleMutantgrowthChecker(mutatedEnzyme, enzymesAndProperties, essentials, supplements, lethalIntermediate);
             
             System.out.println();
             if (grows) {
@@ -142,9 +141,9 @@ public class enzymePathwayCalculator {
     }
 
 
-    ///////////////////////////////
-    // Simulate All Combinations //
-    ///////////////////////////////
+    /////////////////////////////////////////////
+    // Simulate All Single Mutant Combinations //
+    /////////////////////////////////////////////
     public static void simulateAllSingle (String[][][] enzymesAndProperties, String[] essentials, ArrayList<String> allProducts, String lethalIntermediate) {
         // Print headers
         System.out.print("Supplement: ");
@@ -161,7 +160,7 @@ public class enzymePathwayCalculator {
             for (int j = 0; j < allProducts.size(); j++) {
                 currentSupplement = allProducts.get(j);
                 String[] supplements = {currentSupplement};
-                boolean grows = growthChecker(currentMutant, enzymesAndProperties, essentials, supplements, lethalIntermediate);
+                boolean grows = singleMutantGrowthChecker(currentMutant, enzymesAndProperties, essentials, supplements, lethalIntermediate);
                 if (grows) {
                     System.out.print("+ ");
                 }
@@ -173,11 +172,46 @@ public class enzymePathwayCalculator {
         }
     }
 
+    ///////////////////////////////////////
+    // Double Mutant Specific Simulation //
+    ///////////////////////////////////////
+    public static void specificSimulatorDouble (Scanner userInput, String[][][]enzymesAndProperties, String[] essentials, String lethalIntermediate) {
+        int moreCheck = 1;
+        // While loop to ask for multiple prompts if the user wants to try different combos
+        while (moreCheck == 1) {
+            System.out.print("Input the two mutated enzymes: ");
+            int mutatedEnzyme1 = userInput.nextInt() - 1; // Convert to 0-based index for 3d matrix
+            int mutatedEnzyme2 = userInput.nextInt() - 1; // Convert to 0-based index for 3d matrix
+            
+            // Collect further neccesary data about supplements 
+            System.out.print("Input how many metabolic products are supplemented: ");
+            int numberOfSupplements = userInput.nextInt();
+            String[] supplements = new String[numberOfSupplements];
+            for (int i = 0; i < numberOfSupplements; i++) {
+                System.out.print("Input supplement number " + (i+1) + ": ");
+                supplements[i] = userInput.next();
+            }
+            
+            boolean grows = doubleMutantGrowthChecker(mutatedEnzyme1, mutatedEnzyme2, enzymesAndProperties, essentials, supplements, lethalIntermediate);
+            
+            System.out.println();
+            if (grows) {
+                System.out.println("Colony will grow.");
+            }
+            else {
+                System.out.println("Colony will not grow");
+            }
+            System.out.println();
 
-    //////////////////////////////
-    // Growth Checker Algorithm // (Took 1 Day)
-    //////////////////////////////
-    public static Boolean growthChecker(int mutatedEnzyme, String[][][] enzymesAndProperties, String[] essentials, String[] supplements, String lethalIntermediate) {
+            System.out.print("Do you want to check another combination? (1 Yes) (0 No) ");
+            moreCheck = userInput.nextInt();
+        }
+    }
+
+    ////////////////////////////////////////////
+    // Single Mutant Growth Checker Algorithm //
+    ////////////////////////////////////////////
+    public static Boolean singleMutantGrowthChecker(int mutatedEnzyme, String[][][] enzymesAndProperties, String[] essentials, String[] supplements, String lethalIntermediate) {
         Boolean grows = true;
 
         // Create two lists to store reachable products
@@ -208,7 +242,7 @@ public class enzymePathwayCalculator {
         }
 
         // Second traversal, gets reachable considering pre-requisite needs //
-        //Traverses different enzymes
+        // Traverses different enzymes
         for (int i = 0; i < enzymesAndProperties.length; i++) {
             // Dont traverse if mutated
             if (i != mutatedEnzyme) {
@@ -232,10 +266,84 @@ public class enzymePathwayCalculator {
             }
         }
 
-        // Unmetabolized Toxic Checker //
+        // Unmetabolized Toxicity Checker //
         ArrayList<String> metabolized = new ArrayList<>();
         for (int i = 0; i < enzymesAndProperties.length; i++) {
             if (i != mutatedEnzyme) {
+                for (int j = 0; j < enzymesAndProperties[i].length; j++) {
+                    metabolized.add(enzymesAndProperties[i][j][0]);
+                }
+            }
+        }
+        if (!metabolized.contains(lethalIntermediate) && lethalIntermediate.length() > 0) {
+            grows = false;
+        }
+        
+        return grows;
+    }
+
+    ////////////////////////////////////////////
+    // Double Mutant Growth Checker Algorithm //
+    ////////////////////////////////////////////
+    public static Boolean doubleMutantGrowthChecker(int mutatedEnzyme1, int mutatedEnzyme2, String[][][] enzymesAndProperties, String[] essentials, String[] supplements, String lethalIntermediate) {
+        Boolean grows = true;
+
+        // Create two lists to store reachable products
+        ArrayList<String> reachableProducts = new ArrayList<>();
+        ArrayList<String> actuallyReachableProducts = new ArrayList<>();
+
+        // Add the supplemented product(s) to the reachable lists
+        for (int i = 0; i < supplements.length; i++) {
+            reachableProducts.add(supplements[i]);
+            actuallyReachableProducts.add(supplements[i]);
+        }
+        // Add the initial metabolic product to the reachable lists
+        reachableProducts.add("A");
+        actuallyReachableProducts.add("A");
+
+        // Reachable Products Collection //
+        // Initial traversal, gets reachable not considering pointer pre-requisite
+        // Traverses different enzymes
+        for (int i = 0; i < enzymesAndProperties.length; i++) {
+            // Dont traverse if mutated
+            if (i != mutatedEnzyme1 && i != mutatedEnzyme2){
+                // Traverses different pathways
+                for (int j = 0; j < enzymesAndProperties[i].length; j++) {
+                    String pointed = enzymesAndProperties[i][j][1];
+                    reachableProducts.add(pointed);
+                }
+            }
+        }
+
+        // Second traversal, gets reachable considering pre-requisite needs //
+        // Traverses different enzymes
+        for (int i = 0; i < enzymesAndProperties.length; i++) {
+            // Dont traverse if mutated
+            if (i != mutatedEnzyme1 && i != mutatedEnzyme2) {
+                // Traverses different pathways
+                for (int j = 0; j < enzymesAndProperties[i].length; j++) {
+                    String pointer = enzymesAndProperties[i][j][0];
+                    String pointed = enzymesAndProperties[i][j][1];
+                    if (reachableProducts.contains(pointer)) {
+                        actuallyReachableProducts.add(pointed);
+                    }
+                }
+            }
+        }
+
+         // Essentials Checker //
+        for (int i = 0; i < essentials.length; i++) {
+            String currEssential = essentials[i];
+            if (!actuallyReachableProducts.contains(currEssential)) {
+                grows = false;
+                break;
+            }
+        }
+
+        // Unmetabolized Toxicity Checker //
+        ArrayList<String> metabolized = new ArrayList<>();
+        for (int i = 0; i < enzymesAndProperties.length; i++) {
+            if (i != mutatedEnzyme1 && i != mutatedEnzyme2) {
                 for (int j = 0; j < enzymesAndProperties[i].length; j++) {
                     metabolized.add(enzymesAndProperties[i][j][0]);
                 }
